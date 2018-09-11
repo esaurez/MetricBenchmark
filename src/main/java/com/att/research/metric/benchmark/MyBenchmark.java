@@ -34,6 +34,7 @@ package com.att.research.metric.benchmark;
 import org.openjdk.jmh.annotations.*;
 
 import java.sql.*;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.openjdk.jmh.infra.Blackhole;
@@ -43,14 +44,22 @@ public class MyBenchmark {
     public static class MyState {
         private Connection createConnection(){
             try {
-                Class.forName("org.apache.calcite.avatica.remote.Driver");
+                Class.forName(this.driver);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 System.exit(1);
             }
             Connection connection=null;
             try {
-                connection = DriverManager.getConnection(connectionUrl);
+                if(!isMariaDb) {
+                    connection = DriverManager.getConnection(connectionUrl);
+                }
+                else{
+                    Properties connectionProps = new Properties();
+                    connectionProps.put("user", user);
+                    connectionProps.put("password", password);
+                    connection = DriverManager.getConnection(connectionUrl,connectionProps);
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -221,13 +230,21 @@ public class MyBenchmark {
             }
         }
 
+        boolean isMariaDb = true;
+        String user = "root";
+        String password = "mysqltest";
+        //public final String driver = "org.apache.calcite.avatica.remote.Driver";
+        public final String driver = "org.mariadb.jdbc.Driver";
+
+        //public final String connectionUrl = "jdbc:avatica:remote:url=http://localhost:30000;serialization=protobuf";
+        public final String connectionUrl = "jdbc:mariadb://localhost:3306/test";
+
         public Connection testConnection;
-        public final String connectionUrl = "jdbc:avatica:remote:url=http://localhost:30000;serialization=protobuf";
         @Param({ "100", "200", "300", "500", "1000", "10000" })
         public int rows;
     }
 
-    @Benchmark @BenchmarkMode(Mode.AverageTime) @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark @BenchmarkMode(Mode.AverageTime) @OutputTimeUnit(TimeUnit.NANOSECONDS) @Warmup(iterations=1) @Measurement(iterations = 10)
     public void testMethod(MyState state,Blackhole blackhole) {
         //UPDATE table_name
         //SET column1 = value1, column2 = value2, ...
