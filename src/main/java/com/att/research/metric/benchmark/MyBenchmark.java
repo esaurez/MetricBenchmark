@@ -230,17 +230,17 @@ public class MyBenchmark {
             }
         }
 
-        boolean isMariaDb = true;
+        boolean isMariaDb = false;
         String user = "root";
-        String password = "mysqltest";
-        //public final String driver = "org.apache.calcite.avatica.remote.Driver";
-        public final String driver = "org.mariadb.jdbc.Driver";
+        String password = "music";
+        public final String driver = "org.apache.calcite.avatica.remote.Driver";
+        //public final String driver = "org.mariadb.jdbc.Driver";
 
-        //public final String connectionUrl = "jdbc:avatica:remote:url=http://localhost:30000;serialization=protobuf";
-        public final String connectionUrl = "jdbc:mariadb://localhost:3306/test";
+        public final String connectionUrl = "jdbc:avatica:remote:url=http://localhost:30000;serialization=protobuf";
+        //public final String connectionUrl = "jdbc:mariadb://localhost:3306/test";
 
         public Connection testConnection;
-        @Param({ "100", "200", "300", "500", "1000", "10000" })
+        @Param({ "1","10","100", "200", "300", "500", "1000", "10000" })
         public int rows;
     }
 
